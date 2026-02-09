@@ -100,11 +100,21 @@ export default function Index() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    const onboardingComplete = localStorage.getItem('sapphire_onboarding_complete');
-    // For first-time users, show onboarding if not marked as complete
-    if (!onboardingComplete) {
-      setShowOnboarding(true);
-    }
+    const checkOnboarding = () => {
+      const onboardingComplete = localStorage.getItem('sapphire_onboarding_complete');
+      const hasSeenWelcome = sessionStorage.getItem('hasSeenWelcome');
+
+      if (!onboardingComplete && hasSeenWelcome === 'true') {
+        setShowOnboarding(true);
+      }
+    };
+
+    // Check immediately
+    checkOnboarding();
+
+    // Check periodically since welcome status changes in App.tsx
+    const interval = setInterval(checkOnboarding, 500);
+    return () => clearInterval(interval);
   }, []);
 
   const handleOnboardingComplete = () => {

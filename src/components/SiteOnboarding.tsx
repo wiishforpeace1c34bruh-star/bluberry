@@ -130,7 +130,7 @@ export function SiteOnboarding({
     if (!isVisible) return null;
 
     return (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-background/20 backdrop-blur-[2px] animate-fade-in overflow-hidden">
+        <div className="fixed inset-0 z-[10010] flex items-center justify-center p-6 bg-background/20 backdrop-blur-[2px] animate-fade-in overflow-hidden">
             {/* Modern Spotlight Overlay */}
             <div className="absolute inset-0 pointer-events-none transition-all duration-700 ease-in-out bg-background/60"
                 style={{
