@@ -1,6 +1,6 @@
-import { Shield, Hammer, Wrench } from 'lucide-react';
+import { Shield, Hammer, Wrench, Crown, Sparkles } from 'lucide-react';
 
-export const OWNER_USERNAME = 'sudo';
+export const OWNER_USERNAME = 'bleed';
 
 export interface BadgeConfig {
     icon: any;
@@ -15,10 +15,12 @@ export const getIdentityDecorations = (username: string | undefined) => {
     return {
         isOwner,
         title: isOwner ? 'System Owner' : null,
+        customRank: isOwner ? { name: 'REPENT', icon: '🩸', color: '#ef4444' } : null,
+        stats: isOwner ? { xp: 'MAX', level: 'MAX', games: 'MAX', time: 'MAX' } : null,
         specialBadges: isOwner ? [
-            { icon: Shield, label: 'Core Security', color: 'text-blue-400', animate: true },
-            { icon: Hammer, label: 'Lead Developer', color: 'text-white' },
-            { icon: Wrench, label: 'System Admin', color: 'text-blue-300' }
+            { icon: Crown, label: 'Owner', color: 'text-red-500', animate: true },
+            { icon: Shield, label: 'Root Access', color: 'text-white/90' },
+            { icon: Sparkles, label: 'Verified', color: 'text-red-400' }
         ] : []
     };
 };

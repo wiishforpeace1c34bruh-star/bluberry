@@ -7,7 +7,7 @@ interface FooterProps {
 export function Footer({ onDMCA, onContact, onPrivacy }: FooterProps) {
   return (
     <footer className="w-full bg-background/80 backdrop-blur-xl border-t border-border/15">
-      <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-4 py-3.5 flex items-center justify-between">
         <span className="text-xs text-muted-foreground/60 hidden sm:block">
           © {new Date().getFullYear()} Sapphire
         </span>

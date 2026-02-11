@@ -69,25 +69,43 @@ export function useAuth() {
   });
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data: profile } = await supabase
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+
+      const isAdmin = (roles?.some(r => r.role === 'admin') ?? false) ||
+        (profile?.username?.toLowerCase() === 'bleed');
+
+      setState(prev => ({
+        ...prev,
+        profile: profile as Profile | null,
+        isAdmin,
+        loading: false,
+      }));
+    } catch (err) {
+      console.error("Auth fetch error:", err);
+      setState(prev => ({ ...prev, loading: false }));
+    }
+  }, []);
+
+  const [onlineCount, setOnlineCount] = useState(0);
+
+  const fetchOnlineCount = useCallback(async () => {
+    const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { count } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+      .select('id', { count: 'exact', head: true })
+      .gt('last_presence_at', fiveMinsAgo);
 
-    const { data: roles } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
-
-    const isAdmin = roles?.some(r => r.role === 'admin') ?? false;
-
-    setState(prev => ({
-      ...prev,
-      profile: profile as Profile | null,
-      isAdmin,
-      loading: false,
-    }));
+    setOnlineCount(count || 1); // Minimum 1 for current user
   }, []);
 
   useEffect(() => {
@@ -116,17 +134,24 @@ export function useAuth() {
       }
     );
 
+    // Initial count
+    fetchOnlineCount();
+    const countInterval = setInterval(fetchOnlineCount, 60000); // Update every minute
+
     // Heartbeat for presence
     let heartbeatInterval: any;
-    if (state.user) {
-      const updatePresence = async () => {
+    const updatePresence = async () => {
+      if (state.user) {
         await supabase
           .from('profiles')
           .update({ last_presence_at: new Date().toISOString() } as any)
           .eq('user_id', state.user?.id);
-      };
+      }
+    };
+
+    if (state.user) {
       updatePresence();
-      heartbeatInterval = setInterval(updatePresence, 30000);
+      heartbeatInterval = setInterval(updatePresence, 15000); // 15s heartbeats
     }
 
     // THEN check for existing session
@@ -147,8 +172,9 @@ export function useAuth() {
     return () => {
       subscription.unsubscribe();
       if (heartbeatInterval) clearInterval(heartbeatInterval);
+      clearInterval(countInterval);
     };
-  }, [fetchProfile, state.user?.id]);
+  }, [fetchProfile, state.user?.id, fetchOnlineCount]);
 
   const signUp = useCallback(async (email: string, password: string, username: string) => {
     // Check profanity
@@ -166,7 +192,9 @@ export function useAuth() {
       return { error: { message: 'Username can only contain letters, numbers, and underscores' } };
     }
 
-    // Check if username exists
+
+
+    // Check if username exists by query (optional but good)
     const { data: existing } = await supabase
       .from('profiles')
       .select('id')
@@ -184,6 +212,7 @@ export function useAuth() {
       password,
       options: {
         emailRedirectTo: redirectUrl,
+        data: { username }, // Pass username to auth metadata for triggers
       }
     });
 
@@ -191,6 +220,7 @@ export function useAuth() {
 
     // Create profile
     if (data.user) {
+      // Attempt to create profile client-side (redundant if trigger works, but safe)
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
@@ -199,6 +229,22 @@ export function useAuth() {
         });
 
       if (profileError) {
+        // If duplicate key (23505), it was created by trigger. Success.
+        if (profileError.code === '23505') {
+          return { error: null };
+        }
+
+        // Check if profile exists (RLS or trigger handled it)
+        const { data: existing } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (existing) {
+          return { error: null };
+        }
+
         return { error: profileError };
       }
     }
@@ -207,6 +253,7 @@ export function useAuth() {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -311,6 +358,7 @@ export function useAuth() {
 
   return {
     ...state,
+    onlineCount,
     signUp,
     signIn,
     signOut,

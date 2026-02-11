@@ -154,8 +154,10 @@ export function ProfileCustomization() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Avatar must be under 5MB');
+    // Allow larger file size for GIFs (10MB), smaller for static images (5MB)
+    const maxSize = file.type === 'image/gif' ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError(`Avatar must be under ${file.type === 'image/gif' ? '10MB' : '5MB'}`);
       return;
     }
 
@@ -173,8 +175,10 @@ export function ProfileCustomization() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Banner must be under 5MB');
+    // Allow larger file size for GIFs (10MB), smaller for static images (5MB)
+    const maxSize = file.type === 'image/gif' ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError(`Banner must be under ${file.type === 'image/gif' ? '10MB' : '5MB'}`);
       return;
     }
 
@@ -189,7 +193,7 @@ export function ProfileCustomization() {
   };
 
   const handleSaveProfile = async () => {
-    if (!profile) return;
+    if (!profile || !user) return;
 
     setSaving(true);
     setError('');
@@ -211,7 +215,7 @@ export function ProfileCustomization() {
         status_type: statusType,
         social_links: socialLinks,
       })
-      .eq('id', profile.id);
+      .eq('user_id', user.id);
 
     if (updateError) {
       setError(updateError.message);
@@ -275,26 +279,31 @@ export function ProfileCustomization() {
               className="w-full h-full object-cover"
             />
           )}
-          <label className="absolute bottom-2 right-2 p-2 rounded-lg bg-background/80 backdrop-blur-sm cursor-pointer hover:bg-background transition-colors group">
+          {/* Make banner click area larger and more obvious */}
+          <label className="absolute inset-0 cursor-pointer group">
             <input
               type="file"
-              accept="image/*"
+              accept="image/gif,image/jpeg,image/jpg,image/png,image/webp"
               onChange={handleBannerUpload}
               className="hidden"
             />
-            {uploadingBanner ? (
-              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-            ) : (
-              <div className="flex items-center gap-2">
-                <ImagePlus className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
-                <span className="text-xs font-medium hidden group-hover:block transition-all">Change Banner</span>
-              </div>
-            )}
+            <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-all flex items-center justify-center">
+              {uploadingBanner ? (
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-2">
+                  <ImagePlus className="w-8 h-8 text-white drop-shadow-lg" />
+                  <span className="text-xs font-bold text-white drop-shadow-lg px-3 py-1 rounded-full bg-black/30 backdrop-blur-sm">
+                    Click to {bannerUrl ? 'Change' : 'Upload'} Banner
+                  </span>
+                </div>
+              )}
+            </div>
           </label>
           {bannerUrl && (
             <button
               onClick={() => setBannerUrl('')}
-              className="absolute top-2 right-2 p-1.5 rounded-lg bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors"
+              className="absolute top-2 right-2 p-1.5 rounded-lg bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-destructive transition-colors z-10"
             >
               <X className="w-3 h-3" />
             </button>
@@ -318,7 +327,7 @@ export function ProfileCustomization() {
             <label className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 cursor-pointer transition-opacity backdrop-blur-[2px]">
               <input
                 type="file"
-                accept="image/*"
+                accept="image/gif,image/jpeg,image/jpg,image/png,image/webp"
                 onChange={handleAvatarUpload}
                 className="hidden"
               />

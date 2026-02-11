@@ -13,10 +13,20 @@ interface UserMenuProps {
   onSettingsClick: () => void;
 }
 
-export function UserMenu({ user, profile, rank, isAdmin, onSignOut, onSettingsClick }: UserMenuProps) {
+import { getIdentityDecorations } from '@/lib/identity';
+
+export function UserMenu({ user, profile, rank: initialRank, isAdmin, onSignOut, onSettingsClick }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const { customRank, stats } = getIdentityDecorations(profile?.username);
+
+  const rank = customRank
+    ? { ...initialRank, name: customRank.name, icon: customRank.icon as any, color: customRank.color }
+    : initialRank;
+
+  const displayLevel = stats ? stats.level : (profile?.level || 1);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -50,7 +60,7 @@ export function UserMenu({ user, profile, rank, isAdmin, onSignOut, onSettingsCl
         {profile?.avatar_url ? (
           <img src={profile.avatar_url} alt={profile.username} className="w-7 h-7 rounded-full object-cover ring-2 ring-border/30" />
         ) : (
-          <div 
+          <div
             className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
             style={{ backgroundColor: `${rank.color}15`, color: rank.color }}
           >
@@ -60,10 +70,10 @@ export function UserMenu({ user, profile, rank, isAdmin, onSignOut, onSettingsCl
         <span className="text-sm font-medium text-foreground hidden sm:inline">
           {profile?.username || 'User'}
         </span>
-        <svg 
-          className={`w-4 h-4 text-muted-foreground/60 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
-          fill="none" 
-          viewBox="0 0 24 24" 
+        <svg
+          className={`w-4 h-4 text-muted-foreground/60 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
           stroke="currentColor"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -78,7 +88,7 @@ export function UserMenu({ user, profile, rank, isAdmin, onSignOut, onSettingsCl
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt={profile.username} className="w-11 h-11 rounded-xl object-cover" />
               ) : (
-                <div 
+                <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold"
                   style={{ backgroundColor: `${rank.color}15`, color: rank.color }}
                 >
@@ -88,7 +98,7 @@ export function UserMenu({ user, profile, rank, isAdmin, onSignOut, onSettingsCl
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-foreground truncate">{profile?.username}</div>
                 <div className="text-xs text-muted-foreground" style={{ color: rank.color }}>
-                  {rank.name} • Lv.{profile?.level || 1}
+                  {rank.name} • Lv.{displayLevel}
                 </div>
               </div>
             </div>
@@ -99,7 +109,7 @@ export function UserMenu({ user, profile, rank, isAdmin, onSignOut, onSettingsCl
             <MenuItem icon={Trophy} onClick={onSettingsClick}>
               View Profile
             </MenuItem>
-            
+
             <MenuItem icon={Settings} onClick={onSettingsClick}>
               Settings
             </MenuItem>
@@ -122,14 +132,14 @@ export function UserMenu({ user, profile, rank, isAdmin, onSignOut, onSettingsCl
   );
 }
 
-function MenuItem({ 
-  icon: Icon, 
-  children, 
-  onClick, 
-  variant = 'default' 
-}: { 
-  icon: any; 
-  children: React.ReactNode; 
+function MenuItem({
+  icon: Icon,
+  children,
+  onClick,
+  variant = 'default'
+}: {
+  icon: any;
+  children: React.ReactNode;
   onClick: () => void;
   variant?: 'default' | 'danger';
 }) {
@@ -139,8 +149,8 @@ function MenuItem({
       className={`
         w-full flex items-center gap-3 px-4 py-3 text-sm text-left
         transition-all duration-200
-        ${variant === 'danger' 
-          ? 'text-destructive hover:bg-destructive/10' 
+        ${variant === 'danger'
+          ? 'text-destructive hover:bg-destructive/10'
           : 'text-foreground/80 hover:text-foreground hover:bg-secondary/50'
         }
       `}

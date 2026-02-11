@@ -22,7 +22,7 @@ export function SettingsPopup({
   const [view, setView] = useState<SettingsView>('main');
   const [tabTitle, setTabTitle] = useState('');
   const [tabIcon, setTabIcon] = useState('');
-  const { performanceMode, togglePerformanceMode } = usePerformanceMode();
+  const { performanceMode, togglePerformanceMode, ultraMode, toggleUltraMode } = usePerformanceMode();
 
   const handleTitleChange = (value: string) => {
     setTabTitle(value);
@@ -152,6 +152,23 @@ export function SettingsPopup({
                 {performanceMode
                   ? 'Visual effects are currently reduced'
                   : 'Reduce particles and animations for speed'}
+              </span>
+            </div>
+          </SettingButton>
+
+          <SettingButton
+            onClick={toggleUltraMode}
+            icon={ultraMode ? ZapOff : Zap}
+            variant={ultraMode ? 'danger' : 'default'}
+          >
+            <div className="flex flex-col items-start text-left">
+              <span className="font-bold">
+                {ultraMode ? 'Disable Ultra Mode' : 'Enable Ultra Mode'}
+              </span>
+              <span className="text-xs text-muted-foreground font-normal">
+                {ultraMode
+                  ? 'Maximum performance active (Animations Off)'
+                  : 'Strips ALL animations and heavy UI effects'}
               </span>
             </div>
           </SettingButton>

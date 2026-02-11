@@ -143,31 +143,30 @@ export default function Auth() {
         {/* Form Card */}
         <div className="card-modern p-6 rounded-2xl gradient-border">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'signup' && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Username</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60" />
-                  <Input
-                    type="text"
-                    placeholder="Choose a username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 pr-10 bg-secondary/50 border-border/50 focus-visible:ring-1 focus-visible:ring-primary/50"
-                    maxLength={20}
-                  />
-                  {usernameStatus === 'available' && username.length >= 3 && (
-                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
-                  )}
-                  {usernameStatus === 'invalid' && (
-                    <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
-                  )}
-                </div>
-                {usernameStatus === 'invalid' && (
-                  <p className="text-xs text-destructive">Invalid username</p>
+            {/* Username Field - Now for both Sign Up and Sign In */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Username</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/60" />
+                <Input
+                  type="text"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="pl-10 pr-10 bg-secondary/50 border-border/50 focus-visible:ring-1 focus-visible:ring-primary/50"
+                  maxLength={20}
+                />
+                {mode === 'signup' && usernameStatus === 'available' && username.length >= 3 && (
+                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                )}
+                {mode === 'signup' && usernameStatus === 'invalid' && (
+                  <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-destructive" />
                 )}
               </div>
-            )}
+              {mode === 'signup' && usernameStatus === 'invalid' && (
+                <p className="text-xs text-destructive">Invalid username</p>
+              )}
+            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Email</label>

@@ -2,6 +2,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@radix-ui/react-h
 import { Shield, Target, Trophy, Zap, Crown, Activity } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { RANKS } from "@/hooks/useLevelSystem";
+import { getIdentityDecorations } from "@/lib/identity";
 
 interface ProfileHoverProps {
     profile: any;
@@ -11,10 +12,18 @@ interface ProfileHoverProps {
 export function HolographicProfileHover({ profile, children }: ProfileHoverProps) {
     if (!profile) return <>{children}</>;
 
-    const level = profile.level || 1;
-    let currentRank = RANKS[0];
-    for (const r of RANKS) {
-        if (level >= r.minLevel) currentRank = r;
+    const { customRank, stats } = getIdentityDecorations(profile.username);
+
+    const level = stats ? stats.level : (profile.level || 1);
+
+    let currentRank = customRank
+        ? { name: customRank.name, icon: customRank.icon, color: customRank.color }
+        : RANKS[0];
+
+    if (!customRank) {
+        for (const r of RANKS) {
+            if ((profile.level || 1) >= r.minLevel) currentRank = r;
+        }
     }
 
     return (
@@ -66,7 +75,7 @@ export function HolographicProfileHover({ profile, children }: ProfileHoverProps
                                         <span className="text-sm font-black text-white italic tracking-wider">{currentRank.name}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        {level >= 100 && (
+                                        {((typeof level === 'number' && level >= 100) || level === 'MAX' || level === '∞') && (
                                             <div className="p-2 rounded-xl bg-primary/20 border border-primary/50 shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-glow-pulse" title="Sapphire Elite">
                                                 <Crown className="w-5 h-5 text-primary" />
                                             </div>
@@ -91,14 +100,14 @@ export function HolographicProfileHover({ profile, children }: ProfileHoverProps
                                 </span>
                                 <span className="text-lg font-black text-white leading-none tracking-tight">{level}</span>
                                 <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-1">
-                                    <div className="h-full bg-primary" style={{ width: `${(level % 10) * 10}%` }} />
+                                    <div className="h-full bg-primary" style={{ width: typeof level === 'number' ? `${(level % 10) * 10}%` : '100%' }} />
                                 </div>
                             </div>
                             <div className="bg-white/5 border border-white/5 rounded-xl p-2.5 flex flex-col gap-1 hover:bg-white/10 transition-colors group">
                                 <span className="text-[8px] text-muted-foreground font-black uppercase tracking-tighter flex items-center gap-1">
                                     <Zap className="w-2.5 h-2.5 text-accent group-hover:scale-125 transition-transform" /> XP
                                 </span>
-                                <span className="text-lg font-black text-white leading-none tracking-tight">{(profile.xp || 0).toLocaleString()}</span>
+                                <span className="text-lg font-black text-white leading-none tracking-tight">{stats ? stats.xp : (profile.xp || 0).toLocaleString()}</span>
                             </div>
                         </div>
 

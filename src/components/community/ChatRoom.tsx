@@ -3,7 +3,10 @@ import { Send, AlertTriangle, Trash2, ArrowDown, ExternalLink, Shield, Zap, Star
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, checkProfanity } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { useDM } from '@/context/DMContext';
 import { HolographicProfileHover } from '../profile/HolographicProfileHover';
+import { PublicProfileCard } from '../profile/PublicProfileCard';
 import { CrystalizedBadge } from '../CrystalizedBadge';
 import { cn } from '@/lib/utils';
 import { getIdentityDecorations } from '@/lib/identity';
@@ -98,7 +101,7 @@ const MessageItem = memo(({ msg, currentUserId, isAdmin, onDelete, onProfileClic
           ) : (
             <div className={cn(
               "w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold shadow-lg",
-              isOwner ? "bg-gradient-to-br from-white to-blue-400 text-blue-900" :
+              isOwner ? "bg-gradient-to-br from-red-500 via-white to-red-500 text-red-900" :
                 roleGradient ? `bg-gradient-to-br ${roleGradient} text-primary-foreground` : 'bg-secondary/50 text-muted-foreground'
             )}>
               {profile?.username?.charAt(0).toUpperCase() || '?'}
@@ -132,7 +135,7 @@ const MessageItem = memo(({ msg, currentUserId, isAdmin, onDelete, onProfileClic
                 getPrestigeStyles(msg.profile?.level)
               )}>
                 {msg.profile?.username || 'Unknown'}
-                {getPrestigeIcon(msg.profile?.level)}
+                {isOwner ? <span className="text-lg leading-none filter drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" title="REPENT">🩸</span> : getPrestigeIcon(msg.profile?.level)}
               </span>
             </span>
           </HolographicProfileHover>
@@ -210,7 +213,34 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const { setActiveThread, startThread } = useDM();
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleStartDM = async (targetProfile: any) => {
+    if (!targetProfile?.user_id) return;
+    try {
+      const threadId = await startThread(targetProfile.user_id);
+      setActiveThread({
+        id: threadId,
+        created_at: new Date().toISOString(),
+        last_message_at: new Date().toISOString(),
+        other_participant: {
+          username: targetProfile.username,
+          avatar_url: targetProfile.avatar_url
+        }
+      });
+      setSelectedProfile(null); // Close the profile card
+    } catch (error) {
+      console.error('Failed to start DM', error);
+      setError('Failed to start conversation');
+    }
+  };
+
+  const handleViewProfile = (userId: string) => {
+    navigate(`/profile/${userId}`);
+    setSelectedProfile(null);
+  };
 
   // Initial fetch
   useEffect(() => {
@@ -246,7 +276,7 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
 
           // Fetch profile details for the new message in the background
           const [profileRes, rolesRes] = await Promise.all([
-            supabase.from('profiles').select('username, gradient_from, gradient_to, show_gradient, avatar_url').eq('user_id', newMsg.user_id).single(),
+            supabase.from('profiles').select('user_id, username, gradient_from, gradient_to, show_gradient, avatar_url, bio, banner_url, status_message, social_links').eq('user_id', newMsg.user_id).single(),
             supabase.from('user_roles').select('role').eq('user_id', newMsg.user_id)
           ]);
 
@@ -294,7 +324,7 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
       const userIds = [...new Set(data.map(m => m.user_id))] as string[];
 
       const [profilesRes, rolesRes] = await Promise.all([
-        supabase.from('profiles').select('user_id, username, gradient_from, gradient_to, show_gradient, avatar_url').in('user_id', userIds),
+        supabase.from('profiles').select('user_id, username, gradient_from, gradient_to, show_gradient, avatar_url, bio, banner_url, status_message, social_links').in('user_id', userIds),
         supabase.from('user_roles').select('user_id, role').in('user_id', userIds)
       ]);
 
@@ -452,6 +482,8 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
             <PublicProfileCard
               profile={selectedProfile}
               onClose={() => setSelectedProfile(null)}
+              onStartDM={() => handleStartDM(selectedProfile)}
+              onViewProfile={handleViewProfile}
             />
           </div>
         )}

@@ -1,23 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Users, Gamepad2, Server, Wifi } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface StatsBarProps {
     totalGames: number;
 }
 
 export function StatsBar({ totalGames }: StatsBarProps) {
-    const [activeUsers, setActiveUsers] = useState(1240);
-
-    // Fake live user count update
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setActiveUsers(prev => {
-                const change = Math.floor(Math.random() * 5) - 2;
-                return prev + change;
-            });
-        }, 3000);
-        return () => clearInterval(interval);
-    }, []);
+    const { onlineCount } = useAuth();
 
     return (
         <div className="w-full max-w-6xl mx-auto mb-8 animate-fade-in-down">
@@ -30,7 +20,7 @@ export function StatsBar({ totalGames }: StatsBarProps) {
                     </div>
                     <div>
                         <div className="text-2xl font-mono font-bold text-white tracking-tight flex items-center gap-2">
-                            {activeUsers.toLocaleString()}
+                            {onlineCount?.toLocaleString() || '1'}
                             <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                         </div>
                         <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Online Users</div>

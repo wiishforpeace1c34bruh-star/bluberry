@@ -265,48 +265,16 @@ export default function Index() {
 
             {/* Mixed Widgets Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="md:col-span-3 space-y-8">
+              <div className="md:col-span-4 space-y-8">
                 <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-                  <SafeWidget>
-                    <LevelProgressWidget profile={profile} />
-                  </SafeWidget>
-                </div>
-                <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
                   <SafeWidget>
                     <NewsWidget />
                   </SafeWidget>
                 </div>
-                <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+                <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
                   <SafeWidget>
                     <CommunityVaultWidget />
                   </SafeWidget>
-                </div>
-                <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                  <SafeWidget>
-                    <ActivityPulseWidget />
-                  </SafeWidget>
-                </div>
-              </div>
-
-              {/* Sidebar Area */}
-              <div className="space-y-6">
-                <SquadPresence />
-
-                {/* Quick Stats Widget */}
-                <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 backdrop-blur-xl">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Trophy className="w-4 h-4 text-primary" />
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-primary">Global Rank</h3>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-2xl font-black text-white">#1,245</span>
-                    <span className="text-[10px] font-bold text-white/40 uppercase">Top 12% of players</span>
-                  </div>
-                  <div className="mt-8">
-                    <SafeWidget>
-                      <AchievementShowroom />
-                    </SafeWidget>
-                  </div>
                 </div>
               </div>
             </div>
@@ -383,7 +351,7 @@ export default function Index() {
 
         <main className={cn(
           "mx-auto px-4 py-6 pb-12 flex-grow w-full transition-all duration-500",
-          activeTab === 'community' ? "max-w-[1400px] px-2 py-2 h-[calc(100vh-140px)]" : "max-w-6xl"
+          activeTab === 'community' ? "max-w-[1400px] px-2 py-2 h-[calc(100vh-140px)]" : "max-w-[1400px]"
         )}>
           <PageTransition transitionKey={activeTab}>
             {renderContent()}

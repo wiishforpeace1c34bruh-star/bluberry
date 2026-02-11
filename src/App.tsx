@@ -12,20 +12,20 @@ import { AchievementProvider } from "@/context/AchievementContext";
 import { AuraProvider } from "@/context/AuraContext";
 import { AtmosProvider } from "@/context/AtmosContext";
 import { DMProvider } from "@/context/DMContext";
-import { WorldEventProvider } from "@/context/WorldEventContext";
 import { CursorGlow } from "@/components/PremiumEffects";
 import { AtmosAudioDeck } from "@/components/AtmosAudioDeck";
 import { PulseTicker } from "@/components/PulseTicker";
-import { WorldEventOverlay } from "@/components/WorldEventOverlay";
 import { DMChat } from "@/components/DMChat";
 import { CommunityVaultProvider } from "@/context/CommunityVaultContext";
 import { ShockwaveSystem } from "@/components/ShockwaveSystem";
 import { OrbitalHUD } from "@/components/navigation/OrbitalHUD";
 import { NavigationProvider } from "@/context/NavigationContext";
+import { GlobalClickSpark } from "@/components/fx/GlobalClickSpark";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -91,8 +91,13 @@ const App = () => {
   }, [showWelcome]);
 
   const handleEnterSite = () => {
-    sessionStorage.setItem('hasSeenWelcome', 'true');
-    setShowWelcome(false);
+    try {
+      sessionStorage.setItem('hasSeenWelcome', 'true');
+      setShowWelcome(false);
+    } catch (e) {
+      console.warn("Storage access failed:", e);
+      setShowWelcome(false);
+    }
   };
 
   useEffect(() => {
@@ -106,10 +111,6 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (performanceModeState.performanceMode === undefined) {
-    return <div className="fixed inset-0 bg-[#0a0c1a] flex items-center justify-center text-white/20 font-black uppercase tracking-widest">Initializing Systems...</div>;
-  }
-
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -117,37 +118,36 @@ const App = () => {
           <AuraProvider>
             <AtmosProvider>
               <DMProvider>
-                <WorldEventProvider>
-                  <SoundProvider>
-                    <AchievementProvider>
-                      <CommunityVaultProvider>
-                        <NavigationProvider>
-                          <TooltipProvider>
-                            <CursorGlow />
-                            <AtmosAudioDeck />
-                            <PulseTicker />
-                            <WorldEventOverlay />
-                            <DMChat />
-                            <AnimatedBackground />
-                            {showWelcome && <WelcomeScreen onEnter={handleEnterSite} />}
-                            <Toaster />
-                            <Sonner />
-                            <ShockwaveSystem />
-                            <OrbitalHUD />
-                            <BrowserRouter>
-                              <Routes>
-                                <Route path="/" element={<Index />} />
-                                <Route path="/auth" element={<Auth />} />
-                                <Route path="/admin" element={<Admin />} />
-                                <Route path="*" element={<NotFound />} />
-                              </Routes>
-                            </BrowserRouter>
-                          </TooltipProvider>
-                        </NavigationProvider>
-                      </CommunityVaultProvider>
-                    </AchievementProvider>
-                  </SoundProvider>
-                </WorldEventProvider>
+                <SoundProvider>
+                  <AchievementProvider>
+                    <CommunityVaultProvider>
+                      <NavigationProvider>
+                        <TooltipProvider>
+                          <CursorGlow />
+                          <AtmosAudioDeck />
+                          <PulseTicker />
+                          <DMChat />
+                          <AnimatedBackground />
+                          {showWelcome && <WelcomeScreen onEnter={handleEnterSite} />}
+                          <Toaster />
+                          <Sonner />
+                          <ShockwaveSystem />
+                          <GlobalClickSpark />
+                          <OrbitalHUD />
+                          <BrowserRouter>
+                            <Routes>
+                              <Route path="/" element={<Index />} />
+                              <Route path="/auth" element={<Auth />} />
+                              <Route path="/admin" element={<Admin />} />
+                              <Route path="/profile/:userId" element={<Profile />} />
+                              <Route path="*" element={<NotFound />} />
+                            </Routes>
+                          </BrowserRouter>
+                        </TooltipProvider>
+                      </NavigationProvider>
+                    </CommunityVaultProvider>
+                  </AchievementProvider>
+                </SoundProvider>
               </DMProvider>
             </AtmosProvider>
           </AuraProvider>

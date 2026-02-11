@@ -4,9 +4,11 @@ import { useAura } from '@/context/AuraContext';
 
 export const AnimatedBackground = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { performanceMode } = usePerformanceMode();
+  const { performanceMode, ultraMode } = usePerformanceMode();
   const { currentAura } = useAura();
   const mouseRef = useRef({ x: 0, y: 0, active: false });
+
+  if (ultraMode) return null;
 
   useEffect(() => {
     const canvas = canvasRef.current;

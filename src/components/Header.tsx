@@ -74,7 +74,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/20">
-      <div className="max-w-6xl mx-auto px-4 py-4">
+      <div className="max-w-[1400px] mx-auto px-4 py-4">
         {/* Logo Row */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex-1" />
